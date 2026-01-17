@@ -1,0 +1,13 @@
+/* Base Layout */
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-md);
+    width: 100%;
+}
