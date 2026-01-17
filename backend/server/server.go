@@ -13,13 +13,15 @@ type Server struct {
 	targets []config.Target
 	wolSvc  wol.Service
 	mux     *http.ServeMux
+	version string
 }
 
-func NewServer(targets []config.Target, wolSvc wol.Service) *Server {
+func NewServer(targets []config.Target, wolSvc wol.Service, version string) *Server {
 	s := &Server{
 		targets: targets,
 		wolSvc:  wolSvc,
 		mux:     http.NewServeMux(),
+		version: version,
 	}
 	s.routes()
 	return s
@@ -28,6 +30,16 @@ func NewServer(targets []config.Target, wolSvc wol.Service) *Server {
 func (s *Server) routes() {
 	s.mux.HandleFunc("/api/targets", s.handleGetTargets)
 	s.mux.HandleFunc("/api/wake", s.handleWake)
+	s.mux.HandleFunc("/api/version", s.handleGetVersion)
+}
+
+func (s *Server) handleGetVersion(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"version": s.version})
 }
 
 func (s *Server) MountStatic(fSys fs.FS) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"fmt"
 	"io/fs"
 	"log"
@@ -16,11 +17,23 @@ import (
 //go:embed frontend/dist/*
 var frontendFS embed.FS
 
+var Version = "dev"
+
 func main() {
+	versionFlag := flag.Bool("version", false, "Print version and exit")
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(Version)
+		return
+	}
+
 	// 1. Parse Config
-	targets, err := config.ParseTargets(os.Args[1:])
+	// Use flag.Args() instead of os.Args because flag.Parse() consumes flags
+	args := flag.Args()
+	targets, err := config.ParseTargets(args)
 	if err != nil {
-		log.Fatalf("Error parsing targets: %v\nUsage: %s name=mac [name=mac ...]", err, os.Args[0])
+		log.Fatalf("Error parsing targets: %v\nUsage: %s [options] name=mac [name=mac ...]", err, os.Args[0])
 	}
 	if len(targets) == 0 {
 		log.Println("Warning: No targets configured. Start with name=mac arguments.")
@@ -30,7 +43,7 @@ func main() {
 	wolSvc := wol.NewService()
 
 	// 3. Initialize Server
-	srv := server.NewServer(targets, wolSvc)
+	srv := server.NewServer(targets, wolSvc, Version)
 
 	// 4. Serve Static Files
 	// Get the subdirectory of the embedded FS
