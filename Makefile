@@ -32,3 +32,18 @@ clean:
 # Run development server (backend)
 dev:
 	go run main.go
+
+# Docker image configuration
+REGISTRY := registry.local.yhiraki.com
+IMAGE_NAME := $(REGISTRY)/wakeonlan-webapp
+TAG := latest
+
+.PHONY: docker-build docker-push
+
+# Build Docker image
+docker-build:
+	docker build --build-arg VERSION=$(VERSION) -t $(IMAGE_NAME):$(TAG) .
+
+# Push Docker image to local registry
+docker-push:
+	docker push $(IMAGE_NAME):$(TAG)

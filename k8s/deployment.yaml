@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wakeonlan-webapp
+  namespace: wakeonlan-webapp
+  labels:
+    app: wakeonlan-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wakeonlan-webapp
+  template:
+    metadata:
+      labels:
+        app: wakeonlan-webapp
+    spec:
+      # Wake-on-LAN のマジックパケット（UDPブロードキャスト）を送信するためにホストネットワークを使用
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: app
+        image: registry.local.yhiraki.com/wakeonlan-webapp:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        # 起動引数でターゲット名とMACアドレスを指定します (name=mac)
+        args:
+        - "MyPC=A8:A1:59:DC:18:79"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
